@@ -3,13 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.wage</groupId>
-    <artifactId>wage</artifactId>
+    <groupId>com.payroll</groupId>
+    <artifactId>payroll</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>wage</name>
-    <description>wage project for Spring Boot</description>
+    <name>payroll</name>
+    <description>payroll project for Spring Boot</description>
 
     <!--父级依赖-->
     <parent>
