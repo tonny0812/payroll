@@ -1,7 +1,6 @@
 package com.wage.service;
 
 import com.wage.model.Attendance;
-import com.wage.core.common.Service;
 
 import java.util.List;
 
@@ -13,4 +12,10 @@ import java.util.List;
 public interface AttendanceService extends Service<Attendance> {
 
     List<Attendance> selectTitles();
+
+    List<Attendance> findAttendancesByEmployeeId(Integer eId);
+
+    List<Attendance> findAttendancesByTitle(String title);
+
+    void deleteAllByEmployeeId(Integer eId);
 }

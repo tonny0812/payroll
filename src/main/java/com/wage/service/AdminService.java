@@ -1,7 +1,8 @@
 package com.wage.service;
 
 import com.wage.model.Admin;
-import com.wage.core.common.Service;
+
+import java.util.List;
 
 /**
 * @Description: AdminService接口
@@ -10,4 +11,7 @@ import com.wage.core.common.Service;
 */
 public interface AdminService extends Service<Admin> {
 
+    Admin findAdminByUname(String username);
+
+    List<Admin> findAdminsByDepartmentId(Integer dId);
 }

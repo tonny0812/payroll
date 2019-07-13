@@ -1,7 +1,7 @@
 package com.wage.controller;
 
-import com.wage.core.util.Result;
-import com.wage.core.util.ResultUtil;
+import com.wage.util.Result;
+import com.wage.util.ResultUtil;
 import com.wage.model.Admin;
 import com.wage.model.Department;
 import com.wage.service.AdminService;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +35,7 @@ public class AdminController {
     @ResponseBody
     @PostMapping("/login")
     public Result<Admin> login(Admin admin, HttpServletRequest request) throws Exception{
-        Admin adm = adminService.selectBy("uname", admin.getUname());
+        Admin adm = adminService.findAdminByUname(admin.getUname());
         if (adm.getUname().equals(admin.getUname()) && adm.getPwd().equals(admin.getPwd())){
             request.getSession().setAttribute("admin", adm);
             return ResultUtil.SUCCESS();
@@ -60,11 +61,12 @@ public class AdminController {
                        @RequestParam(defaultValue = "0") Integer size, Model model) throws Exception {
         PageHelper.startPage(page, size);
         List<Admin> list = adminService.selectAll();
-        list.remove(0);
-        for (Admin admin:list){
-            Department department = departmentService.selectById(String.valueOf(admin.getType()));
-            admin.setDepartment(department);
-        }
+//        list.remove(0);
+////        for (Admin admin:list){
+////            Department department = departmentService.selectById(admin.getType());
+////            admin.setDepartment(department);
+////        }
+        list = list == null ? new ArrayList<>() : list;
         PageInfo<Admin> pageInfo = new PageInfo<Admin>(list);
         model.addAttribute("pageInfo", pageInfo);
         return "adminList";
@@ -79,8 +81,12 @@ public class AdminController {
 
     @PostMapping("/add")
     public String add(Admin admin, Model model) throws Exception {
-        Integer state = adminService.insert(admin);
-        if (state == 0){
+        Department d = new Department();
+        d.setId(admin.getDId());
+        admin.setDepartment(d);
+        admin.setType(1);
+        admin = adminService.insert(admin);
+        if (null == admin){
             model.addAttribute("message", "添加管理员失败");
             return "message";
         }else {
@@ -90,9 +96,9 @@ public class AdminController {
     }
 
     @GetMapping("/updatePage")
-    public String updatePage(Model model, String id) throws Exception {
+    public String updatePage(Model model, Integer id) throws Exception {
         Admin admin = adminService.selectById(id);
-        Department department = departmentService.selectById(String.valueOf(admin.getType()));
+        Department department = departmentService.selectById(admin.getType());
         admin.setDepartment(department);
 
         List<Department> departments = departmentService.selectAll();
@@ -104,8 +110,8 @@ public class AdminController {
 
     @PostMapping("/update")
     public String update(Admin admin, Model model) throws Exception {
-        Integer state = adminService.update(admin);
-        if (state == 0){
+        admin = adminService.update(admin);
+        if (admin == null){
             model.addAttribute("message", "修改管理员失败");
             return "message";
         }else {
@@ -115,15 +121,10 @@ public class AdminController {
     }
 
     @GetMapping("/delete")
-    public String delete(String id, Model model) throws Exception {
-        Integer state = adminService.deleteById(id);
-        if (state == 0){
-            model.addAttribute("message", "删除管理员失败");
-            return "message";
-        }else {
-            model.addAttribute("message", "删除管理员成功");
-            return "message";
-        }
+    public String delete(Integer id, Model model) throws Exception {
+        adminService.deleteById(id);
+        model.addAttribute("message", "删除管理员成功");
+        return "message";
     }
 
     /*@PostMapping("/insert")

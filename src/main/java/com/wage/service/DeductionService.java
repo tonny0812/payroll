@@ -1,7 +1,6 @@
 package com.wage.service;
 
 import com.wage.model.Deduction;
-import com.wage.core.common.Service;
 
 import java.util.List;
 
@@ -14,7 +13,13 @@ public interface DeductionService extends Service<Deduction> {
 
     List<Deduction> selectTitles();
 
-    List<Deduction> selectListByTitleAndState(String title);
+    List<Deduction> selectListByState();
 
     List<Deduction> selectTitlesByState();
+
+    List<Deduction> findDeductionsByEmployeeId(Integer eId);
+
+    List<Deduction> findDeductionsByTitle(String title);
+
+    void deleteAllByEmployeeId(Integer eId);
 }

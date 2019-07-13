@@ -1,7 +1,8 @@
 package com.wage.service;
 
 import com.wage.model.Employee;
-import com.wage.core.common.Service;
+
+import java.util.List;
 
 /**
 * @Description: EmployeeService接口
@@ -10,4 +11,5 @@ import com.wage.core.common.Service;
 */
 public interface EmployeeService extends Service<Employee> {
 
+    List<Employee> findEmployeeByDepartmentId(Integer dId);
 }

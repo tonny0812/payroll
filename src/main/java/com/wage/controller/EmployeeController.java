@@ -1,24 +1,22 @@
 package com.wage.controller;
 
-import com.wage.core.util.Result;
-import com.wage.core.util.ResultUtil;
-import com.wage.model.Admin;
-import com.wage.model.Department;
-import com.wage.model.Employee;
-import com.wage.service.DepartmentService;
-import com.wage.service.EmployeeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.wage.model.*;
+import com.wage.service.AttendanceService;
+import com.wage.service.DeductionService;
+import com.wage.service.DepartmentService;
+import com.wage.service.EmployeeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +34,12 @@ public class EmployeeController {
     @Resource
     private DepartmentService departmentService;
 
+    @Resource
+    private AttendanceService attendanceService;
+
+    @Resource
+    private DeductionService deductionService;
+
     /**
      * @Description: 分页查询
      * @param page 页码
@@ -52,12 +56,9 @@ public class EmployeeController {
         if (admin == null || admin.getType() == 0){
             list = employeeService.selectAll();
         }else {
-            list = employeeService.selectListBy("dId", admin.getType());
+            list = employeeService.findEmployeeByDepartmentId(admin.getDepartment().getId());
         }
-        for (Employee employee:list){
-            Department department = departmentService.selectById(String.valueOf(employee.getdId()));
-            employee.setDepartment(department);
-        }
+        list = list == null ? new ArrayList<>() : list;
         PageInfo<Employee> pageInfo = new PageInfo<Employee>(list);
         model.addAttribute("pageInfo", pageInfo);
         return "employeeList";
@@ -72,8 +73,11 @@ public class EmployeeController {
 
     @PostMapping("/add")
     public String add(Employee employee, Model model) throws Exception {
-        Integer state = employeeService.insert(employee);
-        if (state == 0){
+        Department d = new Department();
+        d.setId(employee.getDId());
+        employee.setDepartment(d);
+        employee = employeeService.insert(employee);
+        if (employee == null){
             model.addAttribute("message", "添加职员失败");
             return "message";
         }else {
@@ -83,11 +87,8 @@ public class EmployeeController {
     }
 
     @GetMapping("/updatePage")
-    public String updatePage(Model model, String id) throws Exception {
+    public String updatePage(Model model, Integer id) throws Exception {
         Employee employee = employeeService.selectById(id);
-        Department department = departmentService.selectById(String.valueOf(employee.getdId()));
-        employee.setDepartment(department);
-
         List<Department> departments = departmentService.selectAll();
 
         model.addAttribute("departments", departments);
@@ -97,8 +98,11 @@ public class EmployeeController {
 
     @PostMapping("/update")
     public String update(Employee employee, Model model) throws Exception {
-        Integer state = employeeService.update(employee);
-        if (state == 0){
+        Department d = new Department();
+        d.setId(employee.getDId());
+        employee.setDepartment(d);
+        employee = employeeService.update(employee);
+        if (employee == null){
             model.addAttribute("message", "修改职员失败");
             return "message";
         }else {
@@ -108,54 +112,11 @@ public class EmployeeController {
     }
 
     @GetMapping("/delete")
-    public String delete(String id, Model model) throws Exception {
-        Integer state = employeeService.deleteById(id);
-        if (state == 0){
-            model.addAttribute("message", "删除职员失败");
-            return "message";
-        }else {
-            model.addAttribute("message", "删除职员成功");
-            return "message";
-        }
+    public String delete(Integer id, Model model) throws Exception {
+        attendanceService.deleteAllByEmployeeId(id);
+        deductionService.deleteAllByEmployeeId(id);
+        employeeService.deleteById(id);
+        model.addAttribute("message", "删除职员成功");
+        return "message";
     }
-
-    /*@PostMapping("/insert")
-    public Result<Integer> insert(Employee employee) throws Exception{
-        Integer state = employeeService.insert(employee);
-        return ResultUtil.SUCCESS(state);
-    }
-
-    @PostMapping("/deleteById")
-    public Result<Integer> deleteById(@RequestParam String id) throws Exception {
-        Integer state = employeeService.deleteById(id);
-        return ResultUtil.SUCCESS(state);
-    }
-
-    @PostMapping("/update")
-    public Result<Integer> update(Employee employee) throws Exception {
-        Integer state = employeeService.update(employee);
-        return ResultUtil.SUCCESS(state);
-    }
-
-    @GetMapping("/selectById")
-    public Result<Employee> selectById(@RequestParam String id) throws Exception {
-        Employee employee = employeeService.selectById(id);
-        return ResultUtil.SUCCESS(employee);
-    }
-
-    *//*
-    * @Description: 分页查询
-    * @param page 页码
-    * @param size 每页条数
-    * @Reutrn RetResult<PageInfo<Employee>>
-    *//*
-    @GetMapping("/list")
-    public Result<PageInfo<Employee>> list(@RequestParam(defaultValue = "0") Integer page,
-            @RequestParam(defaultValue = "0") Integer size) throws Exception {
-        PageHelper.startPage(page, size);
-        List<Employee> list = employeeService.selectAll();
-        PageInfo<Employee> pageInfo = new PageInfo<Employee>(list);
-        return ResultUtil.SUCCESS(pageInfo);
-    }*/
-
 }

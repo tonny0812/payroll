@@ -1,21 +1,19 @@
 package com.wage.controller;
 
-import com.wage.core.util.ExcelData;
-import com.wage.core.util.ExcelUtil;
 import com.wage.model.Attendance;
 import com.wage.model.Deduction;
-import com.wage.model.Department;
-import com.wage.model.Employee;
 import com.wage.service.AttendanceService;
 import com.wage.service.DeductionService;
-import com.wage.service.DepartmentService;
-import com.wage.service.EmployeeService;
+import com.wage.util.DateUtil;
+import com.wage.util.ExcelData;
+import com.wage.util.ExcelUtil;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,23 +29,11 @@ public class ExcelController {
     private AttendanceService attendanceService;
 
     @Resource
-    private EmployeeService employeeService;
-
-    @Resource
-    private DepartmentService departmentService;
-
-    @Resource
     private DeductionService deductionService;
 
     @RequestMapping("/attendance")
     public void attendance(HttpServletResponse response, String title){
-        List<Attendance> list = attendanceService.selectListBy("aTitle", title);
-        for (Attendance attendance:list){
-            Employee employee = employeeService.selectById(String.valueOf(attendance.geteId()));
-            Department department = departmentService.selectById(String.valueOf(employee.getdId()));
-            employee.setDepartment(department);
-            attendance.setEmployee(employee);
-        }
+        List<Attendance> list = attendanceService.findAttendancesByTitle(title);
 
         ExcelData data = new ExcelData();
         data.setName("attendance");
@@ -69,19 +55,23 @@ public class ExcelController {
             Attendance attendance = list.get(i);
             List<Object> row = new ArrayList();
             row.add(i + 1);
-            row.add(attendance.getaTitle());
-            row.add(attendance.getEmployee().geteNumber());
-            row.add(attendance.getEmployee().geteName());
-            row.add(attendance.getEmployee().getDepartment().getdName());
-            row.add(attendance.getaShould());
-            row.add(attendance.getaReal());
-            row.add(attendance.getaAbsences());
-            row.add(attendance.getaAbsencesCause());
+            row.add(attendance.getATitle());
+            row.add(attendance.getEmployee().getENumber());
+            row.add(attendance.getEmployee().getEName());
+            row.add(attendance.getEmployee().getDepartment().getDName());
+            row.add(attendance.getAShould());
+            row.add(attendance.getAReal());
+            row.add(attendance.getAAbsences());
+            row.add(attendance.getAAbsencesCause());
             rows.add(row);
         }
         data.setRows(rows);
         try{
-            ExcelUtil.exportExcel(response,"出勤情况表",data);
+            StringBuilder fileName = new StringBuilder();
+            fileName.append("出勤情况表")
+                    .append("(").append(DateUtil.formatYYYYMMDD(new Date()))
+                    .append(")");
+            ExcelUtil.exportExcel(response, fileName.toString(),data);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -89,14 +79,7 @@ public class ExcelController {
 
     @RequestMapping("/deduction")
     public void deduction(HttpServletResponse response, String title){
-        List<Deduction> list = deductionService.selectListBy("dTitle", title);
-        for (Deduction deduction:list){
-            Employee employee = employeeService.selectById(String.valueOf(deduction.geteId()));
-            Department department = departmentService.selectById(String.valueOf(employee.getdId()));
-            employee.setDepartment(department);
-            deduction.setEmployee(employee);
-        }
-
+        List<Deduction> list = deductionService.selectAll();
         ExcelData data = new ExcelData();
         data.setName("deduction");
 
@@ -111,6 +94,7 @@ public class ExcelController {
         titles.add("罚金");
         titles.add("税金");
         titles.add("实际工资");
+        titles.add("是否确认");
         data.setTitles(titles);
 
         List<List<Object>> rows = new ArrayList();
@@ -118,20 +102,25 @@ public class ExcelController {
             Deduction deduction = list.get(i);
             List<Object> row = new ArrayList();
             row.add(i + 1);
-            row.add(deduction.getdTitle());
-            row.add(deduction.getEmployee().geteNumber());
-            row.add(deduction.getEmployee().geteName());
-            row.add(deduction.getEmployee().getDepartment().getdName());
-            row.add(deduction.getdBasicWage());
-            row.add(deduction.getdBonus());
-            row.add(deduction.getdFine());
-            row.add(deduction.getdTax());
-            row.add(deduction.getdRealWage());
+            row.add(deduction.getDTitle());
+            row.add(deduction.getEmployee().getENumber());
+            row.add(deduction.getEmployee().getEName());
+            row.add(deduction.getEmployee().getDepartment().getDName());
+            row.add(deduction.getDBasicWage());
+            row.add(deduction.getDBonus());
+            row.add(deduction.getDFine());
+            row.add(deduction.getDTax());
+            row.add(deduction.getDRealWage());
+            row.add(deduction.getDState()==0?"否":"是");
             rows.add(row);
         }
         data.setRows(rows);
         try{
-            ExcelUtil.exportExcel(response,"工资汇总表",data);
+            StringBuilder fileName = new StringBuilder();
+            fileName.append("工资汇总表")
+                    .append("(").append(DateUtil.formatYYYYMMDD(new Date()))
+                    .append(")");
+            ExcelUtil.exportExcel(response, fileName.toString(),data);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -139,14 +128,7 @@ public class ExcelController {
 
     @RequestMapping("/bankIssued")
     public void bankIssued(HttpServletResponse response, String title){
-        List<Deduction> list = deductionService.selectListByTitleAndState(title);
-        for (Deduction deduction:list){
-            Employee employee = employeeService.selectById(String.valueOf(deduction.geteId()));
-            Department department = departmentService.selectById(String.valueOf(employee.getdId()));
-            employee.setDepartment(department);
-            deduction.setEmployee(employee);
-        }
-
+        List<Deduction> list = deductionService.findDeductionsByTitle(title);
         ExcelData data = new ExcelData();
         data.setName("bankIssued");
 
@@ -166,18 +148,22 @@ public class ExcelController {
             Deduction deduction = list.get(i);
             List<Object> row = new ArrayList();
             row.add(i + 1);
-            row.add(deduction.getdTitle());
-            row.add(deduction.getEmployee().geteNumber());
-            row.add(deduction.getEmployee().geteName());
-            row.add(deduction.getEmployee().getDepartment().getdName());
-            row.add(deduction.getEmployee().geteIdCard());
-            row.add(deduction.getEmployee().geteBankCard());
-            row.add(deduction.getdRealWage());
+            row.add(deduction.getDTitle());
+            row.add(deduction.getEmployee().getENumber());
+            row.add(deduction.getEmployee().getEName());
+            row.add(deduction.getEmployee().getDepartment().getDName());
+            row.add(deduction.getEmployee().getEIdCard());
+            row.add(deduction.getEmployee().getEBankCard());
+            row.add(deduction.getDRealWage());
             rows.add(row);
         }
         data.setRows(rows);
         try{
-            ExcelUtil.exportExcel(response,"银行发放表",data);
+            StringBuilder fileName = new StringBuilder();
+            fileName.append("银行发放表")
+                    .append("(").append(DateUtil.formatYYYYMMDD(new Date()))
+                    .append(")");
+            ExcelUtil.exportExcel(response,fileName.toString(),data);
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -1,7 +1,6 @@
 package com.wage.service;
 
 import com.wage.model.Department;
-import com.wage.core.common.Service;
 
 /**
 * @Description: DepartmentService接口

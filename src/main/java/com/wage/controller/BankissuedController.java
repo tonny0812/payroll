@@ -1,9 +1,8 @@
 package com.wage.controller;
 
-import com.wage.core.util.Result;
-import com.wage.core.util.ResultUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.wage.model.Attendance;
 import com.wage.model.Deduction;
 import com.wage.model.Department;
 import com.wage.model.Employee;
@@ -13,13 +12,11 @@ import com.wage.service.EmployeeService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.util.List;
+import java.util.*;
 
 /**
 * @Description: BankissuedController
@@ -48,16 +45,18 @@ public class BankissuedController {
     public String list(@RequestParam(defaultValue = "0") Integer page,
                        @RequestParam(defaultValue = "0") Integer size, Model model) throws Exception {
         PageHelper.startPage(page, size);
-        List<Deduction> list = deductionService.selectListBy("dState", 1);
-        for (Deduction deduction:list){
-            Employee employee = employeeService.selectById(String.valueOf(deduction.geteId()));
-            Department department = departmentService.selectById(String.valueOf(employee.getdId()));
-            employee.setDepartment(department);
-            deduction.setEmployee(employee);
+        List<Deduction> list = deductionService.selectListByState();
+        list = list == null ? new ArrayList<>() : list;
+        PageInfo<Deduction> pageInfo = new PageInfo<>(list);
+
+        Set<String> titles = new HashSet<>();
+        for(Deduction deduction : list) {
+            titles.add(deduction.getDTitle());
         }
-        PageInfo<Deduction> pageInfo = new PageInfo<Deduction>(list);
-        List<Deduction> titles = deductionService.selectTitlesByState();
-        model.addAttribute("titles", titles);
+        List<String> titlesList = new ArrayList<>(titles);
+        Collections.sort(titlesList);
+
+        model.addAttribute("titles", titlesList);
         model.addAttribute("pageInfo", pageInfo);
         return "bankissuedList";
     }

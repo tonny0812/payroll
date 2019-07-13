@@ -1,4 +1,4 @@
-package com.wage.core.util;
+package com.wage.util;
 
 import java.io.Serializable;
 import java.util.List;

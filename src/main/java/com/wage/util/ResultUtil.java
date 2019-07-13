@@ -1,4 +1,4 @@
-package com.wage.core.util;
+package com.wage.util;
 
 /**
  * @Author: zb

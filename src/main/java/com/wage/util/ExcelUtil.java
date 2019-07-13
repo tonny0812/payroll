@@ -1,4 +1,4 @@
-package com.wage.core.util;
+package com.wage.util;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
