@@ -1,5 +1,7 @@
 package com.wage.annotation;
 
+import com.wage.contants.ColumnType;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -7,8 +9,8 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.FIELD;
 
 @Target({FIELD})
-@Retention(RetentionPolicy.RUNTIME)//指定注解在运行时有效
-public @interface EntiName {
+@Retention(RetentionPolicy.RUNTIME)
+public @interface EntityColumn {
     /**
      * 是否为序列号
      * @return
@@ -18,10 +20,11 @@ public @interface EntiName {
      * 字段名称
      * @return
      */
-    String RName()default "";
+    String name() default "";
+
     /**
-     * 排序字段
+     * 字段类型
      * @return
      */
-    int order() default 0;
+    ColumnType type() default ColumnType.STRING;
 }
