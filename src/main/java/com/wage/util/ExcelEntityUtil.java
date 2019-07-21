@@ -286,6 +286,11 @@ public class ExcelEntityUtil {
                 cell.setCellType(Cell.CELL_TYPE_STRING);
                 result = Byte.parseByte(cell.getStringCellValue());
                 break;
+            case BOOLEAN:
+                if(cell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
+                    result = Boolean.valueOf(cell.getBooleanCellValue());
+                }
+                break;
             default:
                 logger.warn("未知数据类型：" + columnType.name());
                 break;

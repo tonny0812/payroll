@@ -73,6 +73,13 @@ public class Employee2 {
     private Double eRank;
 
     /**
+     * 等级
+     */
+    @Column(name = "e_valid")
+    @EntityColumn(name="有效性", type = ColumnType.BOOLEAN)
+    private Boolean eValid;
+
+    /**
      * 时间
      */
     @Column(name = "e_date")
@@ -115,6 +122,10 @@ public class Employee2 {
         this.eDate = eDate;
     }
 
+    public void setEValid(Boolean eValid) {
+        this.eValid = eValid;
+    }
+
     @Override
     public String toString() {
         return "Employee2{" +
@@ -126,6 +137,7 @@ public class Employee2 {
                 ", eIdCard='" + eIdCard + '\'' +
                 ", eBankCard='" + eBankCard + '\'' +
                 ", eRank=" + eRank +
+                ", eValid=" + eValid +
                 ", eDate=" + eDate +
                 '}';
     }
