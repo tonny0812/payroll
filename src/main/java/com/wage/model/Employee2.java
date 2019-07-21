@@ -2,7 +2,7 @@ package com.wage.model;
 
 import com.wage.annotation.EntityColumn;
 import com.wage.annotation.ExcelEntity;
-import com.wage.contants.ColumnType;
+import com.wage.constants.ColumnType;
 import lombok.Setter;
 
 import javax.persistence.Column;

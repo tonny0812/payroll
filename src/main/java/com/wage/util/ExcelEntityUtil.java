@@ -2,7 +2,7 @@ package com.wage.util;
 
 import com.wage.annotation.EntityColumn;
 import com.wage.annotation.ExcelEntity;
-import com.wage.contants.ColumnType;
+import com.wage.constants.ColumnType;
 import com.wage.model.Employee2;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -122,7 +122,7 @@ public class ExcelEntityUtil {
      * @param record
      * @return
      */
-    public static <T> T parse(ExcelRowRecord record, Class<T> clazz) throws Exception {
+    private static <T> T parse(ExcelRowRecord record, Class<T> clazz) throws Exception {
 
         if (record == null || record.getCellMap().isEmpty()) {
             String errorMsg = "空记录" + clazz.getName() + "，无法解析";
@@ -190,7 +190,22 @@ public class ExcelEntityUtil {
         return title;
     }
 
-    private static <T> List<T> getExcelEntities(String excelFilePath, int sheetIndex, Class<T> clazz) throws Exception {
+
+    /**
+     * @param excelFilePath 文件路径
+     * @param sheetIndex sheet页数
+     * @param clazz 转换实体
+     * @param <T>
+     * @return 实体列表
+     * 使用说明：
+     * 需要使用注解@ExcelEntity和@ExcelColumn作用实体及实体字段;
+     * excel文件第一行为表头，表头内容需要跟实体字段注解name相一致;
+     * 实体字段类型需要申明为包装类型，不可为基本类型;
+     * 实体需要定义字段的set方法，并且set方法字段的第一个字符需要大写，如setEmployeeName(String name);
+     * 支持字段包括：String,Float,Double,Long,Integer,Byte,Date,Boolean，如有需要可后续添加其他类型。
+     * @throws Exception
+     */
+    public static <T> List<T> getExcelEntities(String excelFilePath, int sheetIndex, Class<T> clazz) throws Exception {
         List<T> list = new ArrayList<>();
         ExcelTitle excelTitle = ExcelEntityUtil.getExcelTtiles(excelFilePath, sheetIndex);
         EntityDesc tableDesc = getEntityDesc(clazz);

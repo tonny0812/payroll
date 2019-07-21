@@ -1,6 +1,6 @@
 package com.wage.annotation;
 
-import com.wage.contants.ColumnType;
+import com.wage.constants.ColumnType;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
